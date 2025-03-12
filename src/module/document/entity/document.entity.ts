@@ -1,33 +1,35 @@
-import { UserRole } from 'src/common/constants/enum.constant';
 import { TABLE_NAMES } from 'src/common/constants/table-name.constant';
-import { Documents } from 'src/module/document/entity/document.entity';
+import { Users } from 'src/module/users/entity/user.entity';
 import {
   Column,
   DeleteDateColumn,
   Entity,
-  OneToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity({ name: TABLE_NAMES.USER })
-export class Users {
+@Entity({ name: TABLE_NAMES.DOCUMENT })
+export class Documents {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ nullable: false })
   name: string;
 
-  @Column({ nullable: false, unique: true })
-  email: string;
+  @Column({ nullable: false })
+  path: string;
+
+  @Column({ type: 'bigint', nullable: false })
+  size: number;
 
   @Column({ nullable: false })
-  password: string;
+  mimeType: string;
 
-  @Column({ type: 'enum', enum: Object.values(UserRole) })
-  role: UserRole;
+  @Column({ nullable: true })
+  description?: string;
 
-  @OneToMany(() => Documents, (document) => document.user)
-  documents: Documents[];
+  @ManyToOne(() => Users, (user) => user.documents, { onDelete: 'CASCADE' })
+  user: Users;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

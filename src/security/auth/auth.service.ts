@@ -75,7 +75,7 @@ export class AuthService {
         expiresIn: process.env.JWT_TONE_EXPIRY_TIME,
       }),
       id: user.id,
-      firstName: user.name,
+      name: user.name,
       email: user.email,
       role: user.role,
     };

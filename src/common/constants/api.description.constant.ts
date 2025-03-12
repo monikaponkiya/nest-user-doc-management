@@ -112,3 +112,76 @@ export const USER = {
         `,
   },
 };
+
+export const DOCUMENT = {
+  UPLOAD: {
+    summary: 'Upload Document',
+    description: `
+          Uploads a document to the system.
+          
+          **Access**: Only users with the ADMIN, EDITOR and VIEWER role can access this endpoint.
+          
+          **Request Body**:
+          - The request body must contain the file and description fields.
+          
+          **Response**:
+          - Returns the success message.
+        `,
+  },
+  UPDATE: {
+    summary: 'Update Document',
+    description: `
+          Updates the information of an existing document.
+          
+          **Access**: Only users with the ADMIN, EDITOR role can access this endpoint.
+          
+          **Parameters**:
+          - The ID of the document to be updated is provided in the URL path.
+          
+          **Request Body**:
+          - The request body must contain the updated fields defined in the UpdateDocumentDto.
+          
+          **Response**:
+          - Returns the updated document information, including ID, name, path, size, mimeType and description.
+        `,
+  },
+  FIND_BY_ID: {
+    summary: 'Find Document By Id',
+    description: `
+          Retrieves detailed information about a document by its ID.
+          
+          **Access**: Only users with the ADMIN, EDITOR and VIEWER role can access this endpoint.
+          
+          **Parameters**:
+          - The ID of the document to be fetched is provided in the URL path.
+          
+          **Response**:
+          - Returns the document details.
+        `,
+  },
+  FIND_ALL: {
+    summary: 'Find All Documents',
+    description: `
+          Retrieves a list of all documents in the system.
+          
+          **Access**: Only users with the ADMIN role can access this endpoint.
+          
+          **Response**:
+          - Returns a list of all documents.
+        `,
+  },
+  DELETE: {
+    summary: 'Delete Document By Id',
+    description: `
+          Deletes a document from the system by its ID.
+          
+          **Access**: Only users with the ADMIN role can access this endpoint.
+          
+          **Parameters**:
+          - The ID of the document to be deleted is provided in the URL path.
+          
+          **Response**:
+          - Returns a confirmation of the deletion.
+        `,
+  },
+};

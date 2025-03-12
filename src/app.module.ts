@@ -11,6 +11,7 @@ import AppConfiguration from './config/app.config';
 import DatabaseConfiguration from './config/database.config';
 import AuthConfiguration from './config/auth.config';
 import { UsersModule } from './module/users/users.module';
+import { DocumentModule } from './module/document/document.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UsersModule } from './module/users/users.module';
     AuthModule,
     ThrottleModule,
     UsersModule,
+    DocumentModule,
   ],
   providers: [
     {
