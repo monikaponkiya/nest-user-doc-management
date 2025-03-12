@@ -21,7 +21,7 @@ import { RoleGuard } from 'src/security/auth/guards/role.guard';
 import { USER } from 'src/common/constants/api.description.constant';
 
 @Controller('users')
-@ApiTags('users')
+@ApiTags('Users')
 @ApiBearerAuth()
 @Roles(UserRole.ADMIN)
 @UseGuards(RoleGuard)
