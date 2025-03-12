@@ -8,6 +8,7 @@ import {
   Param,
   ParseFilePipe,
   Post,
+  Put,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -21,6 +22,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from './multer.options';
 import { ResponseMessage } from 'src/common/decorators/response.decorator';
 import { DOCUMENT_RESPONSE_MESSAGES } from 'src/common/constants/response.constant';
+import { UpdateDocumentDto } from './dto/update-document.dto';
 
 @Controller('document')
 @ApiTags('Documents')
@@ -34,7 +36,7 @@ export class DocumentController {
   @UseInterceptors(FileInterceptor('file', multerOptions()))
   @ApiConsumes('multipart/form-data')
   @ResponseMessage(DOCUMENT_RESPONSE_MESSAGES.DOCUMENT_UPLOAD)
-  imageUpload(
+  async documentUpload(
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -47,7 +49,27 @@ export class DocumentController {
     @Body('userId') userId: number,
     @Body('description') description?: string,
   ) {
-    return this.documentService.uploadDocument(userId, file, description);
+    return await this.documentService.uploadDocument(userId, file, description);
+  }
+
+  @Put(':id')
+  @UseInterceptors(FileInterceptor('file', multerOptions()))
+  @ApiConsumes('multipart/form-data')
+  @ResponseMessage(DOCUMENT_RESPONSE_MESSAGES.DOCUMENT_UPDATE)
+  async updateDocument(
+    @Param('id') id: number,
+    @Body() updateData: UpdateDocumentDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({ fileType: '.(jpeg|jpg|png|pdf)' }),
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 4 }),
+        ],
+      }),
+    )
+    file?: Express.Multer.File,
+  ) {
+    return this.documentService.updateDocument(id, updateData, file);
   }
 
   @Get(':id')

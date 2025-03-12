@@ -15,4 +15,5 @@ export const DOCUMENT_RESPONSE_MESSAGES = {
   DOCUMENT_UPLOAD: 'Document uploaded successfully',
   DOCUMENT_GET: 'Document get successfully',
   DOCUMENT_DELETE: 'Document deleted successfully',
+  DOCUMENT_UPDATE: 'Document updated successfully',
 };
