@@ -7,7 +7,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { CustomError } from '../helpers/exceptions';
+import { CustomError } from '../helpers';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -19,7 +19,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     // Custom error handling logic
     if (!exception?.response?.error) {
-      exception = CustomError.UnknownError();
+      exception = CustomError('Something went wrong, please try again later!');
     }
 
     let statusCode = this.getStatus(exception);

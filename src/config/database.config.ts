@@ -1,4 +1,5 @@
 import { registerAs } from '@nestjs/config';
+import { UserRole } from 'src/common/constants/enum.constant';
 
 export default registerAs('database', () => ({
   host: process.env.DATABASE_HOST,
@@ -10,6 +11,7 @@ export default registerAs('database', () => ({
     name: 'Admin',
     email: 'admin@gmail.com',
     password: 'Admin@123',
+    role: UserRole.ADMIN,
   },
   postgres: {
     enableSSL: process.env.ENABLE_SQL_SSL ? process.env.ENABLE_SQL_SSL : false,
