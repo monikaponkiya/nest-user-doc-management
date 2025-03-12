@@ -1,25 +1,55 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Documents } from './entity/document.entity';
-import { Repository } from 'typeorm';
-import { CustomError } from 'src/common/helpers';
-import {
-  DOCUMENT_RESPONSE_MESSAGES,
-  USER_RESPONSE_MESSAGES,
-} from 'src/common/constants/response.constant';
-import { UpdateDocumentDto } from './dto/update-document.dto';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Users } from '../users/entity/user.entity';
+import { DOCUMENT_RESPONSE_MESSAGES } from 'src/common/constants/response.constant';
+import { CustomError } from 'src/common/helpers';
+import { Repository } from 'typeorm';
+import { UpdateDocumentDto } from './dto/update-document.dto';
+import { Documents } from './entity/document.entity';
+import { ListDto } from 'src/common/dto/common.dto';
 
 @Injectable()
 export class DocumentService {
   constructor(
     @InjectRepository(Documents)
     private readonly documentRepository: Repository<Documents>,
-    @InjectRepository(Users)
-    private readonly userRepository: Repository<Users>,
   ) {}
+
+  async getAllDocuments(params: ListDto) {
+    try {
+      const queryBuilder =
+        this.documentRepository.createQueryBuilder('document');
+      if (params.search) {
+        queryBuilder.where(
+          'document.name LIKE :search OR document.description LIKE :search',
+          { search: `%${params.search}%` },
+        );
+      }
+      const totalQuery = queryBuilder.clone();
+
+      // Apply pagination
+      if (params.offset !== undefined && params.limit) {
+        queryBuilder.skip(params.offset);
+        queryBuilder.take(params.limit);
+      }
+
+      // Apply sorting
+      if (params.sortOrder && params.sortBy) {
+        queryBuilder.orderBy(
+          `document.${params.sortBy}`,
+          params.sortOrder === 'asc' ? 'ASC' : 'DESC',
+        );
+      } else {
+        queryBuilder.orderBy('document.createdAt', 'DESC');
+      }
+      const documents = await queryBuilder.getMany();
+      const recordsTotal = await totalQuery.getCount();
+      return { result: documents, recordsTotal };
+    } catch (error) {
+      throw CustomError(error.message, error.statusCode);
+    }
+  }
 
   async uploadDocument(
     userId: number,
@@ -76,31 +106,33 @@ export class DocumentService {
 
     // Update other metadata fields
     if (updateData.description) document.description = updateData.description;
-    if (updateData.userId) {
-      const user = await this.userRepository.findOne({
-        where: { id: updateData.userId },
-      });
-      if (!user)
-        throw CustomError(
-          USER_RESPONSE_MESSAGES.USER_NOT_FOUND,
-          HttpStatus.NOT_FOUND,
-        );
-      document.user = user;
-    }
 
     return this.documentRepository.save(document);
   }
 
   async getDocumentById(id: number) {
-    const document = await this.documentRepository.findOne({
-      where: { id },
-      relations: ['user'],
-    });
+    const document = await this.documentRepository
+      .createQueryBuilder('document')
+      .leftJoinAndSelect('document.user', 'user')
+      .select([
+        'document.id',
+        'document.name',
+        'document.path',
+        'document.size',
+        'document.mimeType',
+        'document.description',
+        'user.id',
+        'user.name',
+      ])
+      .where('document.id = :id', { id })
+      .getOne();
+
     if (!document)
       throw CustomError(
         DOCUMENT_RESPONSE_MESSAGES.DOCUMENT_NOT_FOUND,
         HttpStatus.NOT_FOUND,
       );
+
     return document;
   }
 

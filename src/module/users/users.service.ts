@@ -43,7 +43,7 @@ export class UsersService {
       const queryBuilder = this.userRepository.createQueryBuilder('user');
       if (params.search) {
         queryBuilder.where(
-          'user.firstName LIKE :search OR user.lastName LIKE :search OR user.email LIKE :search',
+          'user.name LIKE :search OR user.email LIKE :search',
           { search: `%${params.search}%` },
         );
       }
