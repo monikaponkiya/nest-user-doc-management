@@ -56,22 +56,26 @@ export class DocumentService {
     file: Express.Multer.File,
     description?: string,
   ) {
-    if (!file)
-      throw CustomError(
-        DOCUMENT_RESPONSE_MESSAGES.DOCUMENT_NOT_FOUND,
-        HttpStatus.NOT_FOUND,
-      );
+    try {
+      if (!file)
+        throw CustomError(
+          DOCUMENT_RESPONSE_MESSAGES.DOCUMENT_NOT_FOUND,
+          HttpStatus.NOT_FOUND,
+        );
 
-    const document = this.documentRepository.create({
-      name: file.originalname,
-      path: file.path,
-      size: file.size,
-      mimeType: file.mimetype,
-      description,
-      user: { id: userId },
-    });
+      const document = this.documentRepository.create({
+        name: file.originalname,
+        path: file.path,
+        size: file.size,
+        mimeType: file.mimetype,
+        description,
+        user: { id: userId },
+      });
 
-    return await this.documentRepository.save(document);
+      return await this.documentRepository.save(document);
+    } catch (error) {
+      throw CustomError(error.message, error.statusCode);
+    }
   }
 
   async updateDocument(
@@ -79,73 +83,85 @@ export class DocumentService {
     updateData: UpdateDocumentDto,
     file?: Express.Multer.File,
   ) {
-    const document = await this.documentRepository.findOne({
-      where: { id: documentId },
-    });
-    if (!document)
-      throw CustomError(
-        DOCUMENT_RESPONSE_MESSAGES.DOCUMENT_NOT_FOUND,
-        HttpStatus.NOT_FOUND,
-      );
+    try {
+      const document = await this.documentRepository.findOne({
+        where: { id: documentId },
+      });
+      if (!document)
+        throw CustomError(
+          DOCUMENT_RESPONSE_MESSAGES.DOCUMENT_NOT_FOUND,
+          HttpStatus.NOT_FOUND,
+        );
 
-    // If a new file is uploaded, replace the existing one
-    if (file) {
-      const uploadDir = path.join(__dirname, '..', '..', 'document');
-      const oldFilePath = path.join(uploadDir, document.path);
+      // If a new file is uploaded, replace the existing one
+      if (file) {
+        const uploadDir = path.join(__dirname, '..', '..', 'document');
+        const oldFilePath = path.join(uploadDir, document.path);
 
-      // Delete the old file
-      if (fs.existsSync(oldFilePath)) {
-        fs.unlinkSync(oldFilePath);
+        // Delete the old file
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlinkSync(oldFilePath);
+        }
+
+        // Update document metadata
+        document.path = file.filename;
+        document.mimeType = file.mimetype;
+        document.size = file.size;
       }
 
-      // Update document metadata
-      document.path = file.filename;
-      document.mimeType = file.mimetype;
-      document.size = file.size;
+      // Update other metadata fields
+      if (updateData.description) document.description = updateData.description;
+
+      return this.documentRepository.save(document);
+    } catch (error) {
+      throw CustomError(error.message, error.statusCode);
     }
-
-    // Update other metadata fields
-    if (updateData.description) document.description = updateData.description;
-
-    return this.documentRepository.save(document);
   }
 
   async getDocumentById(id: number) {
-    const document = await this.documentRepository
-      .createQueryBuilder('document')
-      .leftJoinAndSelect('document.user', 'user')
-      .select([
-        'document.id',
-        'document.name',
-        'document.path',
-        'document.size',
-        'document.mimeType',
-        'document.description',
-        'user.id',
-        'user.name',
-      ])
-      .where('document.id = :id', { id })
-      .getOne();
+    try {
+      const document = await this.documentRepository
+        .createQueryBuilder('document')
+        .leftJoinAndSelect('document.user', 'user')
+        .select([
+          'document.id',
+          'document.name',
+          'document.path',
+          'document.size',
+          'document.mimeType',
+          'document.description',
+          'user.id',
+          'user.name',
+        ])
+        .where('document.id = :id', { id })
+        .getOne();
 
-    if (!document)
-      throw CustomError(
-        DOCUMENT_RESPONSE_MESSAGES.DOCUMENT_NOT_FOUND,
-        HttpStatus.NOT_FOUND,
-      );
+      if (!document)
+        throw CustomError(
+          DOCUMENT_RESPONSE_MESSAGES.DOCUMENT_NOT_FOUND,
+          HttpStatus.NOT_FOUND,
+        );
 
-    return document;
+      return document;
+    } catch (error) {
+      throw CustomError(error.message, error.statusCode);
+    }
   }
 
   async deleteDocument(id: number) {
-    const document = await this.documentRepository.findOne({ where: { id } });
-    if (!document)
-      throw CustomError(
-        DOCUMENT_RESPONSE_MESSAGES.DOCUMENT_NOT_FOUND,
-        HttpStatus.NOT_FOUND,
-      );
+    try {
+      const document = await this.documentRepository.findOne({ where: { id } });
+      if (!document)
+        throw CustomError(
+          DOCUMENT_RESPONSE_MESSAGES.DOCUMENT_NOT_FOUND,
+          HttpStatus.NOT_FOUND,
+        );
 
-    const fs = require('fs');
-    fs.unlinkSync(document.path);
-    return this.documentRepository.softDelete({ id });
+      const fs = require('fs');
+      fs.unlinkSync(document.path);
+      return this.documentRepository.softDelete({ id });
+    } catch (error) {
+      throw CustomError(error.message, error.statusCode);
+    }
   }
 }

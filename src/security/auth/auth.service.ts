@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ChangePasswordDto, LoginDto } from '../../common/dto/common.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +9,7 @@ import { CreateUserDto } from 'src/module/users/dto/create-user.dto';
 import { AuthExceptions, CustomError } from 'src/common/helpers';
 import { UsersService } from 'src/module/users/users.service';
 import { hash, compareSync } from 'bcrypt';
+import { USER_RESPONSE_MESSAGES } from 'src/common/constants/response.constant';
 
 @Injectable()
 export class AuthService {
@@ -21,64 +22,83 @@ export class AuthService {
   ) {}
 
   async register(params: CreateUserDto) {
-    return this.userService.create(params);
+    try {
+      const isUserExist = await this.userService.getUserByEmail(params.email);
+      if (isUserExist) {
+        throw CustomError(
+          USER_RESPONSE_MESSAGES.USER_ALREADY_EXIST,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      return this.userService.create(params);
+    } catch (error) {
+      throw CustomError(error.message, error.statusCode);
+    }
   }
 
   // Create initial admin user when app start
   async createInitialUser(): Promise<void> {
-    const user = await this.userRepository.findOne({
-      where: [
-        {
-          email: this.configService.get('database.initialUser.email'),
-        },
-      ],
-    });
+    try {
+      const user = await this.userRepository.findOne({
+        where: [
+          {
+            email: this.configService.get('database.initialUser.email'),
+          },
+        ],
+      });
 
-    if (user) {
-      console.log('Initial user already loaded.');
-    } else {
-      const params: CreateUserDto = {
-        name: this.configService.get('database.initialUser.name'),
-        role: this.configService.get('database.initialUser.role'),
-        email: this.configService.get('database.initialUser.email'),
-        password: await hash(
-          this.configService.get('database.initialUser.password'),
-          10,
-        ),
-      };
-      await this.userRepository.save(params);
-      console.log('Initial user loaded successfully.');
+      if (user) {
+        console.log('Initial user already loaded.');
+      } else {
+        const params: CreateUserDto = {
+          name: this.configService.get('database.initialUser.name'),
+          role: this.configService.get('database.initialUser.role'),
+          email: this.configService.get('database.initialUser.email'),
+          password: await hash(
+            this.configService.get('database.initialUser.password'),
+            10,
+          ),
+        };
+        await this.userRepository.save(params);
+        console.log('Initial user loaded successfully.');
+      }
+    } catch (error) {
+      throw CustomError(error.message, error.statusCode);
     }
   }
 
   // User login api
   async login(params: LoginDto) {
-    const user = await this.userRepository.findOneBy({
-      email: params.email,
-    });
+    try {
+      const user = await this.userRepository.findOneBy({
+        email: params.email,
+      });
 
-    if (!user) {
-      throw AuthExceptions.AccountNotExist();
+      if (!user) {
+        throw AuthExceptions.AccountNotExist();
+      }
+      if (!(await compareSync(params.password, user.password))) {
+        throw AuthExceptions.InvalidIdPassword();
+      }
+      delete user.password;
+      const payload = {
+        id: user.id,
+        name: user.name,
+        role: user.role,
+      };
+      return {
+        accessToken: await this.jwtService.signAsync(payload, {
+          secret: process.env.JWT_TOKEN_SECRET,
+          expiresIn: process.env.JWT_TONE_EXPIRY_TIME,
+        }),
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      };
+    } catch (error) {
+      throw CustomError(error.message, error.statusCode);
     }
-    if (!(await compareSync(params.password, user.password))) {
-      throw AuthExceptions.InvalidIdPassword();
-    }
-    delete user.password;
-    const payload = {
-      id: user.id,
-      name: user.name,
-      role: user.role,
-    };
-    return {
-      accessToken: await this.jwtService.signAsync(payload, {
-        secret: process.env.JWT_TOKEN_SECRET,
-        expiresIn: process.env.JWT_TONE_EXPIRY_TIME,
-      }),
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    };
   }
 
   // user change password api

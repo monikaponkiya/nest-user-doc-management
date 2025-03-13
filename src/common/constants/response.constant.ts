@@ -6,7 +6,7 @@ export const USER_RESPONSE_MESSAGES = {
   USER_UPDATED: 'User updated successfully',
   USER_DELETED: 'User deleted successfully',
   USER_FETCHED: 'User data get successfully',
-  USER_ALREADY_EXIST: 'User already exis',
+  USER_ALREADY_EXIST: 'User already exist',
   USER_NOT_FOUND: 'User not found',
 };
 
