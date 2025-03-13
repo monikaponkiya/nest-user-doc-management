@@ -12,6 +12,7 @@ import DatabaseConfiguration from './config/database.config';
 import AuthConfiguration from './config/auth.config';
 import { UsersModule } from './module/users/users.module';
 import { DocumentModule } from './module/document/document.module';
+import { MockModule } from './module/mock/mock.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { DocumentModule } from './module/document/document.module';
     ThrottleModule,
     UsersModule,
     DocumentModule,
+    MockModule,
   ],
   providers: [
     {

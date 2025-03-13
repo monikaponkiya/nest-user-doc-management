@@ -1,73 +1,165 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# User Document Management
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+User Doc Management is a NestJS-based backend application that provides authentication, role-based access control, user management and document management features. It integrates mock service for document ingestion and retrieval.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Purpose
 
-## Description
+The goal of this project is to develop a backend system that manages user authentication, document storage, and ingestion tracking using NestJS. It includes key APIs for handling user roles, document uploads, and communication with a mock-based ingestion service.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### Features
 
-## Installation
+- User Authentication: Register, login, logout with JWT-based authentication.
 
-```bash
-$ npm install
+- Role-Based Access Control: Supports Admin, Editor, and Viewer roles.
+
+- User Management APIs: Admin functionalities for managing users, roles, and permissions.
+
+- Document Management APIs: CRUD operations for document storage and retrieval.
+
+- Ingestion Trigger API: Triggers document ingestion in the mock service.
+
+- Ingestion Management API: Tracks ingestion status and manages ongoing processes.
+
+- API Documentation: Auto-generated using Swagger.
+
+### Tools & Technologies
+
+- NestJS - Node.js framework for scalable backend development
+
+- TypeScript - Ensures strong type safety
+
+- PostgreSQL - Relational database for document and user storage
+
+- TypeORM - ORM for database interactions
+
+- JWT - Secure authentication and authorization handling
+
+- Swagger - API documentation generation
+
+## Getting Started
+
+### Prerequisites
+
+Ensure you have the following installed:
+
+- Node.js (>=16.0.0)
+
+- PostgreSQL
+
+### Creating the Project with NestJS CLI
+
+1. Clone the project Repository:
+
+```js
+git clone https://github.com/monikaponkiya/nest-user-doc-management
 ```
 
-## Running the app
+2. Navigate to the project directory:
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```js
+cd nest-user-doc-management
 ```
 
-## Test
+3. Install dependencies:
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```js
+npm install
 ```
 
-## Support
+### Environment Variable Configuration
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Create a `.env` file in the root directory and configure the following:
 
-## Stay in touch
+```js
+APP_ENV=development
+APP_VERSION=1.0
+APP_NAME=User_Doc_Management
+APP_PORT=3000
+APP_ENABLE_CORS=true
+DATABASE_HOST=127.0.0.1
+DATABASE_PORT=5432
+DATABASE_NAME=user_doc_management
+DATABASE_USER=postgres
+DATABASE_PASS=root
+JWT_TOKEN_SECRET=SECRET_KEY
+JWT_TONE_EXPIRY_TIME=10d
+APP_THROTTLER_TTL_TIME=60
+APP_THROTTLER_REQUEST_COUNT=10
+ADMIN_USER=admin@gmail.com
+ADMIN_PASSWORD=Admin@123
+```
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Database Setup
 
-## License
+If using local PostgreSQL, ensure your database is running and configured in .env.
 
-Nest is [MIT licensed](LICENSE).
+```js
+- Ensure PostgreSQL is installed and running.
+
+- Create a database named user_doc_management.
+
+- Update the .env file with the correct database credentials.
+```
+
+### Running the Application
+
+To start the development server:
+
+```js
+npm run start
+```
+
+### API Documentation
+
+Swagger documentation is available at:
+
+```js
+The application will be available at http://localhost:3000
+```
+
+### Project Structure
+
+```js
+nest-user-doc-management/
+│── src/
+│   ├── common/            # Shared utilities, constants, and decorators
+│   ├── config/            # Application configuration
+│   ├── migration/         # Database migration files
+│   ├── module/
+│   │   ├── users/         # User management
+│   │   ├── documents/     # Document management
+│   │   ├── mock/          # Mocking service for ingestion
+│   ├── provider/          # Database providers
+│   ├── security/
+│   │   ├── auth/          # Authentication & JWT handling
+│   │   ├── throttle/      # Rate limiting
+│   ├── main.ts            # Application entry point
+│── test/                  # Unit & e2e tests
+│── .env.example           # Sample environment variables
+│── package.json           # Project dependencies
+│── README.md              # Documentation
+```
+
+### Testing
+
+```js
+npm run test
+```
+
+### Contributing
+
+1. Fork the repository
+
+2. Create a branch (git checkout -b feature-name)
+
+3. Commit changes (git commit -m 'Add new feature')
+
+4. Push to branch (git push origin feature-name)
+
+5. Open a pull request
+
+6. Merge pull request to Master branch
+
+### Contact
+
+For support or inquiries, contact monikaponkiya3@gmail.com
