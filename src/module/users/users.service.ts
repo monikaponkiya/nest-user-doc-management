@@ -31,8 +31,9 @@ export class UsersService {
       }
       createUserDto.password = await hash(createUserDto.password, 10);
       const user = this.userRepository.create(createUserDto);
-      await this.userRepository.save(user);
-      return user;
+      const createdUser = await this.userRepository.save(user);
+      delete createdUser.password;
+      return createdUser;
     } catch (error) {
       throw CustomError(error.message, error.statusCode);
     }
