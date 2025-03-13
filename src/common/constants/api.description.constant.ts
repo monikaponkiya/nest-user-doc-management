@@ -185,3 +185,14 @@ export const DOCUMENT = {
         `,
   },
 };
+
+export const MOCK = {
+  STATUS: {
+    summary: 'Check Document Ingestion Status',
+    description: 'Returns the ingestion status of the document',
+  },
+  EMBENDDING: {
+    summary: 'Get Document Embedding',
+    description: 'Returns the embedding of the document',
+  },
+};
