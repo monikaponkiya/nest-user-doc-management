@@ -4,9 +4,10 @@ import { DocumentService } from './document.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Documents } from './entity/document.entity';
 import { Users } from '../users/entity/user.entity';
+import { MockModule } from '../mock/mock.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Documents, Users])],
+  imports: [TypeOrmModule.forFeature([Documents, Users]), MockModule],
   controllers: [DocumentController],
   providers: [DocumentService],
 })

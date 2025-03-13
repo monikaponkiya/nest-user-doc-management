@@ -115,7 +115,8 @@ export class DocumentService {
         }
 
         // Update document metadata
-        document.path = file.filename;
+        document.name = file.originalname;
+        document.path = file.path;
         document.mimeType = file.mimetype;
         document.size = file.size;
       }
