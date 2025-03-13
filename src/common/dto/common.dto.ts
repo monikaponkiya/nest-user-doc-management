@@ -15,17 +15,17 @@ export class ListDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  search: string;
+  search?: string;
 
   @ApiProperty({ enum: ['asc', 'desc'] })
   @IsOptional()
   @IsString()
-  sortOrder: 'asc' | 'desc';
+  sortOrder?: 'asc' | 'desc';
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  sortBy: string;
+  sortBy?: string;
 }
 
 export class LoginDto {
