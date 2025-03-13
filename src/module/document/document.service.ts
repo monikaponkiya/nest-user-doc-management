@@ -8,12 +8,14 @@ import { Repository } from 'typeorm';
 import { UpdateDocumentDto } from './dto/update-document.dto';
 import { Documents } from './entity/document.entity';
 import { ListDto } from 'src/common/dto/common.dto';
+import { MockService } from '../mock/mock.service';
 
 @Injectable()
 export class DocumentService {
   constructor(
     @InjectRepository(Documents)
     private readonly documentRepository: Repository<Documents>,
+    private readonly mockService: MockService,
   ) {}
 
   async getAllDocuments(params: ListDto) {
@@ -45,7 +47,11 @@ export class DocumentService {
       }
       const documents = await queryBuilder.getMany();
       const recordsTotal = await totalQuery.getCount();
-      return { result: documents, recordsTotal };
+      const documentsWithStatus = documents.map((doc) => ({
+        ...doc,
+        ingestionStatus: this.mockService.getIngestionStatus(doc.id),
+      }));
+      return { result: documentsWithStatus, recordsTotal };
     } catch (error) {
       throw CustomError(error.message, error.statusCode);
     }
@@ -72,7 +78,12 @@ export class DocumentService {
         user: { id: userId },
       });
 
-      return await this.documentRepository.save(document);
+      const savedDocument = await this.documentRepository.save(document);
+
+      // Start Mock Ingestion
+      await this.mockService.ingestDocument(savedDocument.id);
+
+      return savedDocument;
     } catch (error) {
       throw CustomError(error.message, error.statusCode);
     }
@@ -112,7 +123,11 @@ export class DocumentService {
       // Update other metadata fields
       if (updateData.description) document.description = updateData.description;
 
-      return this.documentRepository.save(document);
+      const updatedDoc = await this.documentRepository.save(document);
+
+      await this.mockService.ingestDocument(documentId);
+
+      return updatedDoc;
     } catch (error) {
       throw CustomError(error.message, error.statusCode);
     }
@@ -142,7 +157,16 @@ export class DocumentService {
           HttpStatus.NOT_FOUND,
         );
 
-      return document;
+      const ingestionStatus = await this.mockService.getIngestionStatus(id);
+
+      // 🔹 Fetch embeddings from MockService
+      const embeddingData = await this.mockService.getDocumentEmbedding(id);
+
+      return {
+        ...document,
+        ingestionStatus: ingestionStatus.status,
+        embedding: embeddingData.embedding,
+      };
     } catch (error) {
       throw CustomError(error.message, error.statusCode);
     }
@@ -157,11 +181,19 @@ export class DocumentService {
           HttpStatus.NOT_FOUND,
         );
 
-      const fs = require('fs');
       fs.unlinkSync(document.path);
+      this.mockService.deleteDocumentData(id);
       return this.documentRepository.softDelete({ id });
     } catch (error) {
       throw CustomError(error.message, error.statusCode);
     }
+  }
+
+  async getDocumentStatus(documentId: number) {
+    return this.mockService.getIngestionStatus(documentId);
+  }
+
+  async getDocumentEmbedding(documentId: number) {
+    return this.mockService.getDocumentEmbedding(documentId);
   }
 }

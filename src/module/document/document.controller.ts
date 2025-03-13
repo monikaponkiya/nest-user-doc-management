@@ -31,15 +31,19 @@ import { UpdateDocumentDto } from './dto/update-document.dto';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { Users } from '../users/entity/user.entity';
-import { DOCUMENT } from 'src/common/constants/api.description.constant';
+import { DOCUMENT, MOCK } from 'src/common/constants/api.description.constant';
 import { ListDto } from 'src/common/dto/common.dto';
+import { MockService } from '../mock/mock.service';
 
 @Controller('document')
 @ApiTags('Documents')
 @ApiBearerAuth()
 @UseGuards(RoleGuard)
 export class DocumentController {
-  constructor(private readonly documentService: DocumentService) {}
+  constructor(
+    private readonly documentService: DocumentService,
+    private readonly mockService: MockService,
+  ) {}
 
   @Post('list')
   @ApiOperation({
@@ -73,11 +77,13 @@ export class DocumentController {
     @Body() body: CreateDocumentDto,
     @CurrentUser() user: Users,
   ) {
-    return await this.documentService.uploadDocument(
+    const document = await this.documentService.uploadDocument(
       user.id,
       file,
       body.description,
     );
+    await this.mockService.ingestDocument(document.id);
+    return document;
   }
 
   @Put('update/:id')
@@ -123,5 +129,25 @@ export class DocumentController {
   })
   async deleteDocument(@Param('id') id: number) {
     return this.documentService.deleteDocument(id);
+  }
+
+  // New Endpoints for Ingestion Status and Embeddings
+
+  @Get(':id/status')
+  @ApiOperation({
+    summary: MOCK.STATUS.summary,
+    description: MOCK.STATUS.description,
+  })
+  async getDocumentStatus(@Param('id') documentId: number) {
+    return this.mockService.getIngestionStatus(documentId);
+  }
+
+  @Get(':id/embedding')
+  @ApiOperation({
+    summary: MOCK.EMBENDDING.summary,
+    description: MOCK.EMBENDDING.description,
+  })
+  async getDocumentEmbedding(@Param('id') documentId: number) {
+    return this.mockService.getDocumentEmbedding(documentId);
   }
 }
